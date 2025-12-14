@@ -1,130 +1,180 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>업무용 다이어리 (무제한 연도 이동)</title>
-<style>
-  body {font-family:"맑은 고딕",sans-serif;margin:20px;background:#f8f8f8}
-  .diary{max-width:1100px;margin:0 auto;background:white;padding:30px;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.12)}
-  .nav-header{text-align:center;margin:25px 0 20px}
-  .nav-button{padding:10px 18px;font-size:12pt;cursor:pointer;border:1px solid #aaa;background:#f0f8ff;margin:0 8px;border-radius:8px;font-weight:bold}
-  .nav-button:hover{background:#d0e8ff}
-  .current-month{font-size:24pt;font-weight:bold;color:#2c3e50;margin:0 30px}
-  .month-title{text-align:center;font-size:26pt;font-weight:bold;margin:10px 0 25px;color:#2c3e50}
-  table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:20px}
-  th,td{border:1px solid #999;height:112px;vertical-align:top;font-size:7pt;padding:5px;position:relative}
-  th{background:#2c3e50;color:white;height:38px}
-  .day{position:absolute;top:5px;left:8px;font-weight:bold;font-size:11pt;z-index:10}
-  .today{background:#cde8ff!important;border:3px solid #2980b9!important}
-  .sunday{color:#e74c3c}.saturday{color:#2980b9}
-  .weekend{background:#f8f8f8}
-  .other-month{background:#fcfcfc;color:#bbb}
-  .other-month .day{color:#bbb}
-  .content{width:100%;height:86px;border:none;resize:none;background:transparent;font-size:7pt;margin-top:22px;outline:none;box-sizing:border-box}
-  .footer-info{text-align:center;margin:80px 0 40px;color:#27ae60;font-size:14pt}
-  @media print{.nav-header,.footer-info{display:none}body{background:white}.diary{box-shadow:none;padding:10px}}
-</style>
+  <meta charset="UTF-8">
+  <title>2026 업무용 다이어리</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* 전체 페이지 기본 설정 */
+    body {
+      font-family: "맑은 고딕", Malgun Gothic, sans-serif;
+      margin: 20px;
+      background: #f8f8f8;
+      line-height: 1.4;
+    }
+
+    /* 다이어리 전체 박스 */
+    .diary {
+      max-width: 1150px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    /* 월 제목 */
+    h2 {
+      text-align: center;
+      font-size: 24pt;
+      color: #2c3e50;
+      margin: 80px 0 30px;
+    }
+
+    /* 달력 테이블 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #999;
+      height: 120px;           /* 날짜 칸 높이 - 필요시 숫자만 바꾸세요 */
+      vertical-align: top;
+      font-size: 7pt;           /* 글자 크기 - 7pt가 종이 다이어리 느낌 */
+      padding: 8px;
+      position: relative;
+    }
+
+    th {
+      background: #2c3e50;
+      color: white;
+      height: 40px;
+      font-size: 10pt;
+    }
+
+    /* 날짜 숫자 */
+    .day {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      font-weight: bold;
+      font-size: 11pt;
+    }
+
+    .sun { color: #e74c3c; }   /* 일요일 빨강 */
+    .sat { color: #2980b9; }   /* 토요일 파랑 */
+
+    .today {
+      background: #cde8ff !important;
+      border: 3px solid #2980b9 !important;
+    }
+
+    .weekend { background: #f8f8f8; }  /* 주말 연한 회색 */
+
+    /* 메모 입력란 */
+    textarea {
+      width: 100%;
+      height: 88px;             /* 메모 높이 - 필요시 바꾸세요 */
+      border: none;
+      resize: none;
+      background: transparent;
+      font-size: 7pt;
+      padding-top: 28px;        /* 날짜 숫자 아래부터 시작 */
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    /* 인쇄 시 예쁘게 */
+    @media print {
+      body { background: white; margin: 0; }
+      .diary { box-shadow: none; padding: 20px; }
+      @page { margin: 10mm; }
+    }
+  </style>
 </head>
 <body>
 
 <div class="diary">
-  <div class="nav-header">
-    <button class="nav-button" onclick="changeMonth(-12)">이전 해</button>
-    <button class="nav-button" onclick="changeMonth(-1)">이전 달</button>
-    <button class="nav-button" onclick="goToCurrentMonth()">오늘 달</button>
-    <button class="nav-button" onclick="changeMonth(1)">다음 달</button>
-    <button class="nav-button" onclick="changeMonth(12)">다음 해</button>
-    <div class="current-month" id="currentDisplay"></div>
-  </div>
+  <h1 style="text-align:center; color:#2c3e50; margin-bottom:50px; font-size:28pt;">
+    2026 업무용 다이어리
+  </h1>
 
-  <div id="calendar-container"></div>
+  <script>
+    // ------------------- 설정 영역 -------------------
+    // 여기만 수정하면 다이어리 전체가 바뀝니다!
+    const YEAR = 2026;                     // ← 년도 바꾸고 싶을 때 여기만 수정
+    // ------------------------------------------------
+
+    // 1~12월 반복해서 달력 만들기
+    for (let month = 0; month < 12; month++) {
+      // 월 제목 출력 (1월 ~ 12월)
+      document.write(`<h2>${YEAR}년 ${month + 1}월</h2>`);
+
+      // 테이블 시작 + 요일 헤더
+      document.write(`
+        <table>
+          <tr>
+            <th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th>
+          </tr>
+      `);
+
+      // 해당 월의 1일이 무슨 요일인지 계산
+      let date = new Date(YEAR, month, 1);
+      let firstDay = date.getDay();        // 0=일요일 ~ 6=토요일
+      date.setDate(1 - firstDay);          // 그 주 일요일로 이동
+
+      // 달력이 끝날 때까지 반복
+      while (date.getMonth() !== (month + 1) % 12 || date.getDay() !== 0) {
+        if (date.getDay() === 0) document.write('<tr>');  // 일요일이면 새 행 시작
+
+        const thisMonth = date.getMonth() === month;       // 이번 달인지 체크
+        const isToday = date.toISOString().slice(0,10) === new Date().toISOString().slice(0,10);
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+
+        // 날짜 셀 시작
+        document.write(`
+          <td class="${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}">
+        `);
+
+        if (thisMonth) {
+          // 날짜 숫자 출력
+          document.write(`
+            <div class="day ${date.getDay()===0?'sun':''} ${date.getDay()===6?'sat':''}">
+              ${date.getDate()}
+            </div>
+          `);
+
+          // 저장 키 만들기 (예: 2026-03-15)
+          const key = `${YEAR}-${String(month+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+
+          // 저장된 메모 불러오기 + textarea 출력
+          const saved = localStorage.getItem('diary_' + key) || '';
+          document.write(`
+            <textarea oninput="localStorage.setItem('diary_${key}', this.value)">
+              ${saved}
+            </textarea>
+          `);
+        }
+
+        document.write('</td>');
+
+        if (date.getDay() === 6) document.write('</tr>');  // 토요일이면 행 끝
+        date.setDate(date.getDate() + 1);                  // 다음 날로
+      }
+
+      document.write('</table>');
+    }
+  </script>
 </div>
 
-<p class="footer-info">
-  ← 클릭하면 입력 · 내용 자동 저장 (브라우저에 영구 보관)<br>
-  연도 제한 없이 무제한 이동 가능 · 인쇄도 완벽
-</p>
-
-<script>
-const STORAGE_KEY_PREFIX = 'diary_content_';
-let currentYear, currentMonth;
-
-function loadContent(dateStr) { return localStorage.getItem(STORAGE_KEY_PREFIX + dateStr) || ''; }
-function saveContent(dateStr, content) {
-  if (content.trim() === '') localStorage.removeItem(STORAGE_KEY_PREFIX + dateStr);
-  else localStorage.setItem(STORAGE_KEY_PREFIX + dateStr, content);
-}
-
-function goToCurrentMonth() {
-  const today = new Date();
-  currentYear = today.getFullYear();
-  currentMonth = today.getMonth();
-  renderCalendar();
-}
-
-function changeMonth(delta) {
-  currentMonth += delta;
-  while (currentMonth < 0) { currentMonth += 12; currentYear--; }
-  while (currentMonth > 11) { currentMonth -= 12; currentYear++; }
-  renderCalendar();
-}
-
-function renderCalendar() {
-  const container = document.getElementById('calendar-container');
-  const display = document.getElementById('currentDisplay');
-  display.textContent = `${currentYear}년 ${currentMonth + 1}월`;
-
-  const firstDay = new Date(currentYear, currentMonth, 1);
-  const startDate = new Date(firstDay);
-  startDate.setDate(startDate.getDate() - firstDay.getDay());
-
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-
-  let html = `<div class="month-title">${currentYear}년 ${currentMonth + 1}월</div>`;
-  html += '<table><tr>';
-  ["일","월","화","수","목","금","토"].forEach(d => html += `<th>${d}요일</th>`);
-  html += '</tr>';
-
-  let date = new Date(startDate);
-  let rowCount = 0;
-  while (rowCount < 6) {
-    html += '<tr>';
-    for (let i = 0; i < 7; i++) {
-      const y = date.getFullYear();
-      const m = date.getMonth();
-      const d = date.getDate();
-      const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      const isThisMonth = y === currentYear && m === currentMonth;
-      const isToday = dateStr === todayStr;
-      const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-
-      let classes = [];
-      if (isWeekend) classes.push('weekend');
-      if (!isThisMonth) classes.push('other-month');
-      if (isToday) classes.push('today');
-
-      html += `<td class="${classes.join(' ')}">`;
-      html += `<div class="day ${date.getDay()===0?'sunday':''} ${date.getDay()===6?'saturday':''}">${d}</div>`;
-      if (isThisMonth) {
-        const saved = loadContent(dateStr);
-        html += `<textarea class="content" placeholder="내용 입력..." data-date="${dateStr}"
-                 oninput="saveContent(this.dataset.date, this.value)">${saved}</textarea>`;
-      }
-      html += '</td>';
-      date.setDate(date.getDate() + 1);
-    }
-    html += '</tr>';
-    if (rowCount >= 4 && date.getMonth() !== currentMonth) break;
-    rowCount++;
-  }
-  html += '</table>';
-  container.innerHTML = html;
-}
-
-// 첫 로드 시 오늘 달 표시
-goToCurrentMonth();
-</script>
+<div style="text-align:center; margin:80px 0; color:#777; font-size:12pt;">
+  • 클릭하면 메모 입력 가능<br>
+  • 작성한 내용은 브라우저에 영구 저장됩니다 (기기마다 별도)<br>
+  • 인쇄는 Ctrl + P → 여백 없음 + 배경 그래픽 체크 추천
+</div>
 
 </body>
 </html>
